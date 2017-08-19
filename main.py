@@ -44,11 +44,13 @@ for ID in followers-following:
 	user = twitterAPI.show_user(user_id=ID)
 	unwanted[("{} (@{})".format(user['name'], user['screen_name']))] = user
 
-chosen = Picker(
-	title = 'Select accounts to block',
-	options = list(unwanted.keys())
-).getSelected()
+if len(unwanted) > 0:
+	chosen = Picker(
+		title = 'Select accounts to block',
+		options = list(unwanted.keys())
+	).getSelected()
 
-for key in chosen:
-	user = unwanted[key]
-	block(user)
+	if chosen:
+		for key in chosen:
+			user = unwanted[key]
+			block(user)

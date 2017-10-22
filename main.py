@@ -2,8 +2,9 @@ import os, sys
 import time
 from twython import Twython, TwythonError, TwythonRateLimitError, TwythonAuthError
 from picker import *
+from keys import *
 
-twitterAPI = Twython(os.environ["TWITTER_API_KEY"], os.environ["TWITTER_API_SECRET"], os.environ["TWITTER_TOKEN"], os.environ["TWITTER_TOKEN_SECRET"])
+twitterAPI = Twython(twitter_api_key, twitter_api_secret, twitter_access_token, twitter_access_secret)
 
 
 YELLOW = '\033[93m'
@@ -15,13 +16,12 @@ ENDC = '\033[0m'
 #   -=- CODE TIME -=-
 # ======================
 
-followers = set(twitterAPI.get_followers_ids()['ids'])
-following = set(twitterAPI.get_friends_ids()['ids'])
+followers = list(twitterAPI.get_followers_ids()['ids'])
 
-def block(user):
+def mute(user):
 	try:
-		twitterAPI.create_block(user_id=user["id"])
-		print(RED + "Blocked" + ENDC + " {} (@{}).".format(user["name"], user["screen_name"]))
+		twitterAPI.create_mute(user_id=user["id"])
+		print(RED + "muted" + ENDC + " {} (@{}).".format(user["name"], user["screen_name"]))
 	except TwythonRateLimitError:
 		print("uh oh")
 		sys.exit()
@@ -36,21 +36,21 @@ def block(user):
 # 	if input().lower() == "n":
 # 		continue
 
-# 	block(user)
+# 	mute(user)
 # 	print()
 
 unwanted = {}
-for ID in followers-following:
+for ID in followers[:70]:
 	user = twitterAPI.show_user(user_id=ID)
 	unwanted[("{} (@{})".format(user['name'], user['screen_name']))] = user
 
 if len(unwanted) > 0:
 	chosen = Picker(
-		title = 'Select accounts to block',
+		title = 'Select accounts to mute',
 		options = list(unwanted.keys())
 	).getSelected()
 
 	if chosen:
 		for key in chosen:
 			user = unwanted[key]
-			block(user)
+			mute(user)
